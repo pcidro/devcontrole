@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { PatternFormat } from "react-number-format";
+import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   name: z.string().min(1, "O campo nome é obrigatório"),
@@ -22,7 +24,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export default function CustomerForm() {
+export default function CustomerForm({ userId }: { userId: string }) {
   const {
     register,
     control,
@@ -31,9 +33,17 @@ export default function CustomerForm() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+  const router = useRouter();
 
-  function handleRegisterCustomer(data: FormData) {
-    console.log(data);
+  async function handleRegisterCustomer(data: FormData) {
+    await api.post("/api/customer", {
+      name: data.name,
+      phone: data.telefone,
+      email: data.email,
+      userId: userId,
+      adress: data.adress,
+    });
+    router.replace("/dashboard/customer");
   }
 
   return (
